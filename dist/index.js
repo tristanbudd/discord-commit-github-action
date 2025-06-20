@@ -35855,13 +35855,7 @@ async function run() {
 
             if (showColourChanges && commit.message) {
                 const lines = commit.message.split('\n');
-                const processedLines = lines.map(line => {
-                    if (line.startsWith('+') || line.startsWith('-')) {
-                        return line;
-                    } else {
-                        return ' ' + line;
-                    }
-                });
+                const processedLines = lines.map(line => line);
                 formattedMessage = `\`\`\`diff\n${processedLines.join('\n')}\n\`\`\``;
             } else {
                 formattedMessage = `\`\`\`\n${commit.message || 'No commit message provided'}\n\`\`\``;
@@ -35881,8 +35875,8 @@ async function run() {
             let formattedMessage;
 
             if (showColourChanges && (modifiedFiles.length > 0 || removedFiles.length > 0)) {
-                const modifiedLines = modifiedFiles.map(file => `+ ${file}`).join('\n');
-                const removedLines = removedFiles.map(file => `- ${file}`).join('\n');
+                const modifiedLines = modifiedFiles.map(file => `+${file}`).join('\n');
+                const removedLines = removedFiles.map(file => `-${file}`).join('\n');
                 formattedMessage = `\`\`\`diff\n${modifiedLines}\n${removedLines}\n\`\`\``;
             } else {
                 formattedMessage = `\`\`\`\nModified:\n${modifiedFiles.join('\n')}\nRemoved:\n${removedFiles.join('\n')}\n\`\`\``;
@@ -35894,6 +35888,7 @@ async function run() {
                 inline: false
             });
         }
+
 
         if (showCommitBranch && commit) {
             fields.push({
@@ -35912,24 +35907,26 @@ async function run() {
                 || commit.author?.login
                 || null;
 
-            const authorUrl = username ? `https://github.com/${username}` : null;
+            const displayName = username
+                ? `${authorName} (${username})`
+                : authorName;
 
-            const authorValue = authorUrl
-                ? `[${authorName}](${authorUrl})`
+            const authorValue = username
+                ? `${authorName} ([${username}](https://github.com/${username}))`
                 : authorName;
 
             fields.push({
                 name: 'Author',
                 value: authorValue,
-                inline: true
+                inline: false
             });
         }
 
         if (showCommitLink && commitURL) {
             fields.push({
                 name: 'Commit Link',
-                value: `[View Commit](${commitURL}) [View Repository](${repoURL})`,
-                inline: true
+                value: `[View Commit](${commitURL}) | [View Repository](${repoURL})`,
+                inline: false
             });
         }
 
