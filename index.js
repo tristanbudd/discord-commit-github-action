@@ -96,7 +96,6 @@ async function run() {
 
             let formattedMessage;
             formattedMessage = `\`\`\`\n${commitMessage}\n\`\`\``;
-            formattedMessage = formattedMessage.length
 
             fields.push({
                 name: 'Commit Message',
@@ -128,32 +127,31 @@ async function run() {
                 else if (file.status === 'removed') removedFiles.push(file.filename);
             });
 
-            let formattedMessage;
-            formattedMessage = '```\n';
+            let innerContent = '';
 
             if (addedFiles.length) {
-                formattedMessage += 'Added:\n' + addedFiles.join('\n') + '\n\n';
+                innerContent += 'Added:\n' + addedFiles.join('\n') + '\n\n';
             } else {
-                formattedMessage += 'Added:\n\n';
+                innerContent += 'Added:\n\n';
             }
 
             if (modifiedFiles.length) {
-                formattedMessage += 'Modified:\n' + modifiedFiles.join('\n') + '\n\n';
+                innerContent += 'Modified:\n' + modifiedFiles.join('\n') + '\n\n';
             } else {
-                formattedMessage += 'Modified:\n\n';
+                innerContent += 'Modified:\n\n';
             }
 
             if (removedFiles.length) {
-                formattedMessage += 'Removed:\n' + removedFiles.join('\n') + '\n';
+                innerContent += 'Removed:\n' + removedFiles.join('\n') + '\n';
             } else {
-                formattedMessage += 'Removed:\n';
+                innerContent += 'Removed:\n';
             }
 
-            formattedMessage += '```';
+            const wrapped = '```\n' + truncate(innerContent, 1018) + '\n```';
 
             fields.push({
                 name: 'Changed Files',
-                value: formattedMessage,
+                value: wrapped,
                 inline: false
             });
         }
