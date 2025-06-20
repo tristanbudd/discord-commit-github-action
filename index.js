@@ -92,18 +92,10 @@ async function run() {
         let fields = [];
 
         if (showCommitMessage && commit) {
-            const maxTotalLength = 1000;
-            const wrapperOverhead = 7;
+            const commitMessage = truncate(commit.message || 'No commit message provided', 1024);
 
-            let message = commit.message || 'No commit message provided';
-            message = message.replace(/\r?\n|\r/g, ' ');
-            const maxMessageLength = maxTotalLength - wrapperOverhead;
-
-            if (message.length > maxMessageLength) {
-                message = message.slice(0, maxMessageLength - 3) + '...';
-            }
-
-            const formattedMessage = `\`\`\`\n${message}\n\`\`\``;
+            let formattedMessage;
+            formattedMessage = `\`\`\`\n${commitMessage}\n\`\`\``;
 
             fields.push({
                 name: 'Commit Message',
