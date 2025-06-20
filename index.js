@@ -84,12 +84,12 @@ async function run() {
             embed.timestamp = new Date().toISOString();
         }
 
-        const payload = {}
+        let payload;
 
         if (textContent) {
-            const payload = { content: textContent, embed : embed };
+            payload = { content: textContent, embeds: [embed] };
         } else {
-            const payload = { embeds: [embed] };
+            payload = { embeds: [embed] };
         }
 
         const response = await fetch(webhookURL, {
