@@ -1,0 +1,59 @@
+name: 'Discord Commit Message Webhook'
+description: 'Sends a customizable Discord embed via webhook whenever a commit is pushed to the repository, notifying users of the latest changes.'
+author: 'Tristan Budd'
+inputs:
+  webhook-url:
+    description: 'Discord webhook URL'
+    required: true
+    default: ${{ secrets.WEBHOOK_URL }}
+  embed-title:
+    description: 'Title for the embed'
+    required: false
+    default: 'New Commit'
+  embed-description:
+    description: 'Description for the embed'
+    required: false
+    default: 'A new commit has been posted'
+  show-commit-message:
+    description: 'Show commit message in embed'
+    required: false
+    default: 'true'
+  colour-changes:
+    description: 'Colour embed based on plus/minus changes'
+    required: false
+    default: 'true'
+  show-changed-files:
+    description: 'Show list of changed files'
+    required: false
+    default: 'true'
+  show-timestamp:
+    description: 'Show timestamp in embed footer'
+    required: false
+    default: 'true'
+  embed-colour:
+    description: 'Embed colour in hex, e.g. #FFFFFF for white'
+    required: false
+    default: '#FFFFFF'
+  embed-footer-text:
+    description: 'Footer text in the embed'
+    required: false
+    default: ''
+  embed-image-url:
+    description: 'URL of an image to display in embed'
+    required: false
+    default: ''
+  embed-thumbnail-url:
+    description: 'URL of thumbnail image in embed'
+    required: false
+    default: ''
+  embed-author-name:
+    description: 'Author name shown in embed'
+    required: false
+    default: ''
+  embed-author-url:
+    description: 'URL linked to author name in embed'
+    required: false
+    default: ''
+runs:
+  using: 'node12'
+  main: 'action.js'
