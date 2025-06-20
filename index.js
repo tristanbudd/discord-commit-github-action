@@ -63,8 +63,29 @@ async function run() {
         let fields = [];
 
         if (showCommitMessage && commit) {
-            let formattedMessage;
-            formattedMessage = `\`\`\`\n${commit.message || 'No commit message provided'}\n\`\`\``;
+            let formattedMessage = commit.message || 'No commit message provided';
+
+            // Format the commit message to ensure it fits within discord embed limits.
+            const maxLength = 1024;
+            if (formattedMessage.length > maxLength) {
+                const suffix = (remaining) => `... (and ${remaining} more characters)`;
+
+                let remainingLength = formattedMessage.length - maxLength;
+                let suffixText = suffix(remainingLength);
+
+                let availableLength = maxLength - suffixText.length;
+
+                while (availableLength < 0) {
+                    remainingLength++;
+                    suffixText = suffix(remainingLength);
+                    availableLength = maxLength - suffixText.length;
+                }
+
+                const truncatedMessage = formattedMessage.slice(0, availableLength);
+                formattedMessage = `${truncatedMessage}${suffixText}`;
+            } else {
+                formattedMessage = `\`\`\`\n${formattedMessage}\n\`\`\``;
+            }
 
             fields.push({
                 name: 'Commit Message',
@@ -96,32 +117,33 @@ async function run() {
                 else if (file.status === 'removed') removedFiles.push(file.filename);
             });
 
-            let formattedMessage;
-            formattedMessage = '```\n';
+            let message = '```\n';
 
-            if (addedFiles.length) {
-                formattedMessage += 'Added:\n' + addedFiles.join('\n') + '\n\n';
-            } else {
-                formattedMessage += 'Added:\n\n';
+            const sections = [
+                ['Added', addedFiles],
+                ['Modified', modifiedFiles],
+                ['Removed', removedFiles],
+            ];
+
+            for (const [label, files] of sections) {
+                message += `${label}:\n`;
+                if (files.length) message += files.join('\n') + '\n\n';
+                else message += '\n';
             }
 
-            if (modifiedFiles.length) {
-                formattedMessage += 'Modified:\n' + modifiedFiles.join('\n') + '\n\n';
-            } else {
-                formattedMessage += 'Modified:\n\n';
-            }
+            message = message.trimEnd() + '\n```';
 
-            if (removedFiles.length) {
-                formattedMessage += 'Removed:\n' + removedFiles.join('\n') + '\n';
-            } else {
-                formattedMessage += 'Removed:\n';
+            // Format the changed files message to ensure it fits within Discord embed limits.
+            const maxLength = 1024;
+            if (message.length > maxLength) {
+                const suffix = '... (truncated)';
+                const availableLength = maxLength - suffix.length;
+                message = message.slice(0, availableLength) + suffix;
             }
-
-            formattedMessage += '```';
 
             fields.push({
                 name: 'Changed Files',
-                value: formattedMessage,
+                value: message,
                 inline: false
             });
         }
