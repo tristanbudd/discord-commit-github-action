@@ -39827,7 +39827,7 @@ function hexToDecimal(hex) {
  * @returns {string|*}
  */
 function truncate(str, max) {
-    return str.length > max ? str.slice(0, max - 3) + '...' : str;
+    return str.length > max ? str.slice(0, max - 128) + '...' : str;
 }
 
 /**
@@ -39893,8 +39893,18 @@ async function run() {
         let fields = [];
 
         if (showCommitMessage && commit) {
-            let formattedMessage;
-            formattedMessage = `\`\`\`\n${commit.message || 'No commit message provided'}\n\`\`\``;
+            const maxTotalLength = 100;
+            const wrapperLength = 6;
+
+            const maxInnerLength = maxTotalLength - wrapperLength;
+
+            let innerMessage = commit.message || 'No commit message provided';
+
+            if (innerMessage.length > maxInnerLength) {
+                innerMessage = innerMessage.slice(0, maxInnerLength - 3) + '...';
+            }
+
+            const formattedMessage = `\`\`\`\n${innerMessage}\n\`\`\``;
 
             fields.push({
                 name: 'Commit Message',
@@ -40040,12 +40050,6 @@ async function run() {
         if (embed.footer) {
             embed.footer.text = truncate(embed.footer.text || '', 2048);
         }
-
-        embed.fields = (embed.fields || []).slice(0, 25).map(field => ({
-            name: truncate(field.name || '', 256),
-            value: truncate(field.value || '', 1024),
-            inline: !!field.inline
-        }));
 
         let totalSize = calculateEmbedSize(embed);
 
