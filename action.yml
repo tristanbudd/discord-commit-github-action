@@ -54,5 +54,5 @@ inputs:
     required: false
     default: ''
 runs:
-  using: 'node12'
-  main: 'action.js'
+  using: 'node20'
+  main: 'dist/index.js'
