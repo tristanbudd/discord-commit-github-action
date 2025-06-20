@@ -6,7 +6,9 @@ jobs:
   discord_notify_empty:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: tristanbudd/discord-commit-github-action@master
         with:

@@ -35854,16 +35854,7 @@ async function run() {
             let formattedMessage;
 
             if (showColourChanges && commit.message) {
-                const lines = commit.message.split('\n');
-                const processedLines = lines.map(line => {
-                    if (line.startsWith('+') || line.startsWith('-')) {
-                        return line;
-                    } else {
-                        return ' ' + line;
-                    }
-                });
-                formattedMessage = `\`\`\`diff\n${processedLines.join('\n')}\n\`\`\``;
-
+                formattedMessage = `\`\`\`diff\n${commit.message || 'No commit message provided'}\n\`\`\``;
             } else {
                 formattedMessage = `\`\`\`\n${commit.message || 'No commit message provided'}\n\`\`\``;
             }
@@ -35875,10 +35866,13 @@ async function run() {
             });
         }
 
-        if (showChangedFiles && commit) {
-            const addedFiles = Array.isArray(commit.added) ? commit.added : [];
-            const modifiedFiles = Array.isArray(commit.modified) ? commit.modified : [];
-            const removedFiles = Array.isArray(commit.removed) ? commit.removed : [];
+        const commits = context.payload.commits || [];
+        const lastCommit = commits.length > 0 ? commits[commits.length - 1] : null;
+
+        if (showChangedFiles && lastCommit) {
+            const addedFiles = lastCommit.added || [];
+            const modifiedFiles = lastCommit.modified || [];
+            const removedFiles = lastCommit.removed || [];
 
             let formattedMessage;
 
