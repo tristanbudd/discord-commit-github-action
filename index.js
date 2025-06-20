@@ -97,6 +97,8 @@ async function run() {
             let formattedMessage;
             formattedMessage = `\`\`\`\n${commitMessage}\n\`\`\``;
 
+            formattedMessage = formattedMessage.length
+
             fields.push({
                 name: 'Commit Message',
                 value: formattedMessage,
