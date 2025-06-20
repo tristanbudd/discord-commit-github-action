@@ -92,8 +92,11 @@ async function run() {
         let fields = [];
 
         if (showCommitMessage && commit) {
-            let formattedMessage;
-            formattedMessage = `\`\`\`\n${commit.message || 'No commit message provided'}\n\`\`\``;
+            let commitMsg = commit.message || 'No commit message provided';
+            if (commitMsg.length > 1021) {
+                commitMsg = commitMsg.slice(0, 1018) + '...';
+            }
+            const formattedMessage = `\`\`\`\n${commitMsg}\n\`\`\``;
 
             fields.push({
                 name: 'Commit Message',
