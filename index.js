@@ -66,7 +66,7 @@ async function run() {
             let formattedMessage = commit.message || 'No commit message provided';
 
             // Format the commit message to ensure it fits within discord embed limits.
-            const wrapLength = 7;
+            const wrapLength = 24;
             const maxLength = 1024 - wrapLength;
             if (formattedMessage.length > maxLength) {
                 const suffix = (remaining) => `... (and ${remaining} more characters)`;
@@ -135,7 +135,7 @@ async function run() {
             message = message.trimEnd() + '\n```';
 
             // Format the changed files message to ensure it fits within Discord embed limits.
-            const wrapLength = 7;
+            const wrapLength = 24;
             const maxLength = 1024 - wrapLength;
             if (message.length > maxLength) {
                 const suffix = '... (truncated)';
