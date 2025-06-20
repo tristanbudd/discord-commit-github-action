@@ -1,0 +1,32 @@
+name: Send Test Discord Commit Message - Full
+
+on: [push]
+
+jobs:
+  discord_notify_full:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: tristanbudd/discord-commit-github-action@master
+        with:
+          webhook-url: ${{ secrets.WEBHOOK_URL }}
+
+          text-content: "Here's a test notification for a commit!"
+          embed-title: "Commit Notification"
+          embed-description: "This commit updates several important files."
+          embed-colour: "#7289DA"
+          embed-author-name: "GitHub Action Bot"
+          embed-author-icon-url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          embed-author-url: "https://github.com/tristanbudd/discord-commit-github-action"
+          embed-thumbnail-url: "https://avatars.githubusercontent.com/u/9919?s=200&v=4"
+          embed-image-url: "https://i.imgur.com/AfFp7pu.png"
+          embed-footer-text: "Powered by GitHub Actions"
+          embed-footer-icon-url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          embed-footer-timestamp: "true"
+          show-commit-message: "true"
+          colour-changes: "true"
+          show-changed-files: "true"
+          show-commit-branch: "true"
+          show-commit-author: "true"
+          show-commit-link: "true"

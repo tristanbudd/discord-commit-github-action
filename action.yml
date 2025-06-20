@@ -3,16 +3,46 @@ description: 'Sends a customizable Discord embed via webhook whenever a commit i
 author: 'Tristan Budd'
 inputs:
   webhook-url:
-    description: 'Discord webhook URL'
+    description: 'Discord Webhook URL'
     required: true
+  text-content:
+    description: 'Text content to send with the embed'
+    required: false
   embed-title:
     description: 'Title for the embed'
     required: false
-    default: 'New Commit'
   embed-description:
     description: 'Description for the embed'
     required: false
-    default: 'A new commit has been posted'
+  embed-colour:
+    description: 'Embed colour in hex, e.g. #FFFFFF for white'
+    required: false
+    default: '#FFFFFF'
+  embed-author-name:
+    description: 'Author name in the embed'
+    required: false
+  embed-author-icon-url:
+    description: 'URL of the author icon in the embed'
+    required: false
+  embed-author-url:
+    description: 'URL of the author in the embed'
+    required: false
+  embed-thumbnail-url:
+    description: 'URL of thumbnail image in embed'
+    required: false
+  embed-image-url:
+    description: 'URL of image to display in embed'
+    required: false
+  embed-footer-text:
+    description: 'Footer text in the embed'
+    required: false
+  embed-footer-icon-url:
+    description: 'URL of the footer icon in the embed'
+    required: false
+  embed-footer-timestamp:
+    description: 'Show timestamp in the embed footer'
+    required: false
+    default: 'true'
   show-commit-message:
     description: 'Show commit message in embed'
     required: false
@@ -25,34 +55,18 @@ inputs:
     description: 'Show list of changed files'
     required: false
     default: 'true'
-  show-timestamp:
-    description: 'Show timestamp in embed footer'
+  show-commit-branch:
+    description: 'Show commit branch in embed'
     required: false
     default: 'true'
-  embed-colour:
-    description: 'Embed colour in hex, e.g. #FFFFFF for white'
+  show-commit-author:
+    description: 'Show commit author in embed'
     required: false
-    default: '#FFFFFF'
-  embed-footer-text:
-    description: 'Footer text in the embed'
+    default: 'true'
+  show-commit-link:
+    description: 'Show link to commit in embed'
     required: false
-    default: ''
-  embed-image-url:
-    description: 'URL of an image to display in embed'
-    required: false
-    default: ''
-  embed-thumbnail-url:
-    description: 'URL of thumbnail image in embed'
-    required: false
-    default: ''
-  embed-author-name:
-    description: 'Author name shown in embed'
-    required: false
-    default: ''
-  embed-author-url:
-    description: 'URL linked to author name in embed'
-    required: false
-    default: ''
+    default: 'true'
 runs:
   using: 'node20'
   main: 'dist/index.js'
