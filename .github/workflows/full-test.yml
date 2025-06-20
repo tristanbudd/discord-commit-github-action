@@ -1,6 +1,8 @@
 name: Send Test Discord Commit Message - Full
 
-on: [push]
+# on: [push]
+on:
+  workflow_dispatch:
 
 jobs:
   discord_notify_full:
