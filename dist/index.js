@@ -40034,7 +40034,15 @@ async function run() {
             payload = { embeds: [embed] };
         }
 
-        core.debug(JSON.stringify(payload, null, 2));
+        core.debug(`Final Payload: ${JSON.stringify(payload, null, 2)}`);
+
+        const embedLength = JSON.stringify(embed).length;
+        core.debug(`Embed character count: ${embedLength}`);
+        core.debug(`Field count: ${embed.fields.length}`);
+        core.debug(`Field name/value lengths:`);
+        for (const field of embed.fields) {
+            core.debug(`- ${field.name}: ${field.value.length} chars`);
+        }
 
         const response = await fetch(webhookURL, {
             method: 'POST',
@@ -40044,10 +40052,13 @@ async function run() {
             body: JSON.stringify(payload),
         });
 
+        const responseBody = await response.text();
+
         if (!response.ok) {
-            core.setFailed(`Failed to send webhook: ${response.statusText}`);
+            core.setFailed(`Failed to send webhook: ${response.statusText} (${response.status})\nResponse: ${responseBody}`);
             return;
         }
+
         core.info('Webhook sent successfully');
     } catch (error) {
         core.setFailed(error.message);
