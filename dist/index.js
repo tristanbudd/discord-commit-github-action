@@ -39893,18 +39893,18 @@ async function run() {
         let fields = [];
 
         if (showCommitMessage && commit) {
-            const maxTotalLength = 100;
-            const wrapperLength = 6;
+            const maxTotalLength = 1000;
+            const wrapperOverhead = 7;
 
-            const maxInnerLength = maxTotalLength - wrapperLength;
+            let message = commit.message || 'No commit message provided';
+            message = message.replace(/\r?\n|\r/g, ' ');
+            const maxMessageLength = maxTotalLength - wrapperOverhead;
 
-            let innerMessage = commit.message || 'No commit message provided';
-
-            if (innerMessage.length > maxInnerLength) {
-                innerMessage = innerMessage.slice(0, maxInnerLength - 3) + '...';
+            if (message.length > maxMessageLength) {
+                message = message.slice(0, maxMessageLength - 3) + '...';
             }
 
-            const formattedMessage = `\`\`\`\n${innerMessage}\n\`\`\``;
+            const formattedMessage = `\`\`\`\n${message}\n\`\`\``;
 
             fields.push({
                 name: 'Commit Message',
