@@ -26,8 +26,7 @@ function hexToDecimal(hex) {
  * @returns {string|*}
  */
 function truncate(str, max) {
-    if (str.length <= max) return str;
-    return str.slice(0, max - 32) + '...';
+    return str.length > max ? str.slice(0, max - 128) + '...' : str;
 }
 
 /**
