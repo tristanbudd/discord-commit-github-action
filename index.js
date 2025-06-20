@@ -21,7 +21,7 @@ function runGitCommand(cmd) {
 async function run() {
     try {
         const webhookURL = core.getInput('webhook-url', { required: true });
-        const gitToken = core.getInput('git-token', { required: false }) || '';
+        const githubToken = core.getInput('github-token', { required: false }) || '';
 
         const textContent = core.getInput('text-content', { required: false }) || '';
         const embedTitle = core.getInput('embed-title', { required: false }) || 'GitHub Commit Notification';
@@ -68,7 +68,7 @@ async function run() {
         }
 
         if (showChangedFiles && commitSha) {
-            const octokit = github.getOctokit(gitToken);
+            const octokit = github.getOctokit(githubToken);
 
             const { data: commitData } = await octokit.rest.repos.getCommit({
                 owner: context.repo.owner,
