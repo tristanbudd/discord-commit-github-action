@@ -40034,31 +40034,28 @@ async function run() {
         // Ensure that values do not exceed Discord's limits.
         embed.title = truncate(embed.title || '', 256);
         embed.description = truncate(embed.description || '', 4096);
-
         if (embed.author) {
             embed.author.name = truncate(embed.author.name || '', 256);
         }
-
         if (embed.footer) {
             embed.footer.text = truncate(embed.footer.text || '', 2048);
         }
 
-        if (textContent && textContent.length > 2000) {
-            textContent = textContent.slice(0, 1997) + '...';
-        }
-
-        embed.fields = (embed.fields || []).slice(0, 25).map(field => {
-            return {
-                name: truncate(field.name || '', 256),
-                value: truncate(field.value || '', 1024),
-                inline: !!field.inline
-            };
-        });
+        embed.fields = (embed.fields || []).slice(0, 25).map(field => ({
+            name: truncate(field.name || '', 256),
+            value: truncate(field.value || '', 1024),
+            inline: !!field.inline
+        }));
 
         let totalSize = calculateEmbedSize(embed);
+
         while (totalSize > 6000 && embed.fields.length > 0) {
-            embed.fields.pop(); // remove last field
+            embed.fields.pop();
             totalSize = calculateEmbedSize(embed);
+        }
+
+        if (textContent && textContent.length > 2000) {
+            textContent = textContent.slice(0, 1997) + '...';
         }
 
         let payload;
