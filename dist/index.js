@@ -35851,14 +35851,79 @@ async function run() {
         let fields = [];
 
         if (showCommitMessage && commit) {
+            let formattedMessage;
+
+            if (showColourChanges && commit.message) {
+                const lines = commit.message.split('\n');
+                const processedLines = lines.map(line => {
+                    if (line.startsWith('+') || line.startsWith('-')) {
+                        return line;
+                    } else {
+                        return ' ' + line;
+                    }
+                });
+                formattedMessage = `\`\`\`diff\n${processedLines.join('\n')}\n\`\`\``;
+            } else {
+                formattedMessage = `\`\`\`\n${commit.message || 'No commit message provided'}\n\`\`\``;
+            }
+
             fields.push({
                 name: 'Commit Message',
-                value: commit.message || 'No commit message provided',
+                value: formattedMessage,
                 inline: false
             });
         }
 
-        // Adding rest here in a little bit.
+        if (showChangedFiles && commit) {
+            let formattedMessage;
+
+            if (showColourChanges && commit.modified) {
+                const modifiedFiles = commit.modified.map(file => `+ ${file}`).join('\n');
+                const removedFiles = commit.removed.map(file => `- ${file}`).join('\n');
+                formattedMessage = `\`\`\`diff\n${modifiedFiles}\n${removedFiles}\n\`\`\``;
+            } else {
+                const modifiedFiles = commit.modified.join('\n');
+                const removedFiles = commit.removed.join('\n');
+                formattedMessage = `\`\`\`\nModified:\n${modifiedFiles}\nRemoved:\n${removedFiles}\n\`\`\``;
+            }
+
+            fields.push({
+                name: 'Changed Files',
+                value: formattedMessage,
+                inline: false
+            });
+        }
+
+        if (showCommitBranch && commit) {
+            fields.push({
+                name: 'Branch',
+                value: commit.branch || 'No branch information available',
+                inline: true
+            });
+        }
+
+        if (showCommitAuthor && commit) {
+            let authorName = commit.author?.name || 'No author information available';
+            let authorUrl = commit.author?.url || commit.author?.profileUrl || null;
+
+            let authorValue = authorUrl
+                ? `[${authorName}](${authorUrl})`
+                : authorName;
+
+            fields.push({
+                name: 'Author',
+                value: authorValue,
+                inline: true
+            });
+        }
+
+        if (showCommitLink && commitURL) {
+            fields.push({
+                name: 'Commit Link',
+                value: `[View Commit](${commitURL}) [View Repository](${repoURL})`,
+                inline: true
+            });
+        }
 
         let colourDecimal = hexToDecimal(embedColour);
 
