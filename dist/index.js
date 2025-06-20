@@ -35823,18 +35823,25 @@ async function run() {
     try {
         const webhookURL = core.getInput('webhook-url', { required: true });
 
-        const embedTitle = core.getInput('embed-title') || 'New Commit';
-        const embedDescription = core.getInput('embed-description') || 'A new commit has been posted';
-        const showCommitMessage = core.getInput('show-commit-message').toLowerCase() === 'true';
-        const colourChanges = core.getInput('colour-changes').toLowerCase() === 'true';
-        const showChangedFiles = core.getInput('show-changed-files').toLowerCase() === 'true';
-        const showTimestamp = core.getInput('show-timestamp').toLowerCase() === 'true';
-        const embedColour = core.getInput('embed-colour') || '#FFFFFF';
-        const embedFooterText = core.getInput('embed-footer-text') || '';
-        const embedImageUrl = core.getInput('embed-image-url') || '';
-        const embedThumbnailUrl = core.getInput('embed-thumbnail-url') || '';
-        const embedAuthorName = core.getInput('embed-author-name') || '';
-        const embedAuthorUrl = core.getInput('embed-author-url') || '';
+        const textContent = core.getInput('text-content', { required: false }) || '';
+        const embedTitle = core.getInput('embed-title', { required: false }) || 'GitHub Commit Notification';
+        const embedDescription = core.getInput('embed-description', { required: false }) || '';
+        const embedColour = core.getInput('embed-colour', { required: false }) || '#ffffff';
+        const embedAuthorName = core.getInput('embed-author-name', { required: false }) || '';
+        const embedAuthorIconURL = core.getInput('embed-author-icon-url', { required: false }) || '';
+        const embedAuthorURL = core.getInput('embed-author-url', { required: false }) || '';
+        const embedThumbnailUrl = core.getInput('embed-thumbnail-url', { required: false }) || '';
+        const embedImageURL = core.getInput('embed-image-url', { required: false }) || '';
+        const embedFooterText = core.getInput('embed-footer-text', { required: false }) || '';
+        const embedFooterIcon = core.getInput('embed-footer-icon', { required: false }) || '';
+        const embedFooterIconURL = core.getInput('embed-footer-icon-url', { required: false }) || '';
+        const embedFooterTimestamp = core.getInput('embed-footer-timestamp', { required: false }) === 'true';
+        const showCommitMessage = core.getInput('show-commit-message', { required: false }) === 'true';
+        const showColourChanges = core.getInput('show-colour-changes', { required: false }) === 'true';
+        const showChangedFiles = core.getInput('show-changed-files', { required: false }) === 'true';
+        const showCommitBranch = core.getInput('show-commit-branch', { required: false }) === 'true';
+        const showCommitAuthor = core.getInput('show-commit-author', { required: false }) === 'true';
+        const showCommitLink = core.getInput('show-commit-link', { required: false }) === 'true';
 
         const context = github.context;
         const commit = github.context.payload.head_commit;
@@ -35851,50 +35858,49 @@ async function run() {
             });
         }
 
-        if (showChangedFiles && commit && commit.modified && commit.modified.length > 0) {
-            fields.push({
-                name: 'Changed Files',
-                value: commit.modified.map(f => `\`${f}\``).join('\n'),
-                inline: false,
-            });
-        }
+        // Adding rest here in a little bit.
 
         let colourDecimal = hexToDecimal(embedColour);
 
-        if (colourChanges && commit) {
-            if (commit.added & commit.added.length > 0) {
-                colourDecimal = hexToDecimal('#00FF00'); // Green for added files
-            } else if (commit.removed && commit.removed.length > 0) {
-                colourDecimal = hexToDecimal('#FF0000'); // Red for removed files
-            }
-        }
-
         const embed = {
             title: embedTitle,
-            description: embedDescription,
             color: colourDecimal,
-            url: commitURL || repoURL,
             fields: fields,
-            timestamp: showTimestamp && commit ? commit.timestamp : undefined,
         };
 
-        if (embedFooterText || showTimestamp) {
-            embed.timestamp = new Date().toISOString();
-        }
-        if (embedImageUrl) {
-            embed.image = { url: embedImageUrl };
-        }
-        if (embedThumbnailUrl) {
-            embed.thumbnail = { url: embedThumbnailUrl };
+        if (embedDescription) {
+            embed.description = embedDescription;
         }
         if (embedAuthorName) {
             embed.author = {
                 name: embedAuthorName,
-                url: embedAuthorUrl || repoURL,
+                icon_url: embedAuthorIconURL,
+                url: embedAuthorURL
             };
         }
+        if (embedThumbnailUrl) {
+            embed.thumbnail = { url: embedThumbnailUrl };
+        }
+        if (embedImageURL) {
+            embed.image = { url: embedImageURL };
+        }
+        if (embedFooterText) {
+            embed.footer = {
+                text: embedFooterText,
+                icon_url: embedFooterIconURL || embedFooterIcon
+            };
+        }
+        if (embedFooterTimestamp) {
+            embed.timestamp = new Date().toISOString();
+        }
 
-        const payload = {embeds: [embed] };
+        const payload = {}
+
+        if (textContent) {
+            const payload = { content: textContent, embed : embed };
+        } else {
+            const payload = { embeds: [embed] };
+        }
 
         const response = await fetch(webhookURL, {
             method: 'POST',
