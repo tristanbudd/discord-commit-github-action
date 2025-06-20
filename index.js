@@ -63,30 +63,8 @@ async function run() {
         let fields = [];
 
         if (showCommitMessage && commit) {
-            let formattedMessage = commit.message || 'No commit message provided';
-
-            // Format the commit message to ensure it fits within discord embed limits.
-            const wrapLength = 24;
-            const maxLength = 1024 - wrapLength;
-            if (formattedMessage.length > maxLength) {
-                const suffix = (remaining) => `... (and ${remaining} more characters)`;
-
-                let remainingLength = formattedMessage.length - maxLength;
-                let suffixText = suffix(remainingLength);
-
-                let availableLength = maxLength - suffixText.length;
-
-                while (availableLength < 0) {
-                    remainingLength++;
-                    suffixText = suffix(remainingLength);
-                    availableLength = maxLength - suffixText.length;
-                }
-
-                const truncatedMessage = formattedMessage.slice(0, availableLength);
-                formattedMessage = `${truncatedMessage}${suffixText}`;
-            } else {
-                formattedMessage = `\`\`\`\n${formattedMessage}\n\`\`\``;
-            }
+            let formattedMessage;
+            formattedMessage = `\`\`\`\n${commit.message || 'No commit message provided'}\n\`\`\``;
 
             fields.push({
                 name: 'Commit Message',
@@ -118,34 +96,32 @@ async function run() {
                 else if (file.status === 'removed') removedFiles.push(file.filename);
             });
 
-            let message = '```\n';
+            let formattedMessage;
+            formattedMessage = '```\n';
 
-            const sections = [
-                ['Added', addedFiles],
-                ['Modified', modifiedFiles],
-                ['Removed', removedFiles],
-            ];
-
-            for (const [label, files] of sections) {
-                message += `${label}:\n`;
-                if (files.length) message += files.join('\n') + '\n\n';
-                else message += '\n';
+            if (addedFiles.length) {
+                formattedMessage += 'Added:\n' + addedFiles.join('\n') + '\n\n';
+            } else {
+                formattedMessage += 'Added:\n\n';
             }
 
-            message = message.trimEnd() + '\n```';
-
-            // Format the changed files message to ensure it fits within Discord embed limits.
-            const wrapLength = 24;
-            const maxLength = 1024 - wrapLength;
-            if (message.length > maxLength) {
-                const suffix = '... (truncated)';
-                const availableLength = maxLength - suffix.length;
-                message = message.slice(0, availableLength) + suffix;
+            if (modifiedFiles.length) {
+                formattedMessage += 'Modified:\n' + modifiedFiles.join('\n') + '\n\n';
+            } else {
+                formattedMessage += 'Modified:\n\n';
             }
+
+            if (removedFiles.length) {
+                formattedMessage += 'Removed:\n' + removedFiles.join('\n') + '\n';
+            } else {
+                formattedMessage += 'Removed:\n';
+            }
+
+            formattedMessage += '```';
 
             fields.push({
                 name: 'Changed Files',
-                value: message,
+                value: formattedMessage,
                 inline: false
             });
         }
@@ -216,31 +192,32 @@ async function run() {
             embed.image = { url: embedImageURL };
         }
         if (embedFooterText) {
-            embed.footer = {
-                text: embedFooterText,
-                icon_url: embedFooterIconURL || embedFooterIcon
-            };
+            embed.footer = { text: embedFooterText };
+            if (embedFooterIconURL || embedFooterIcon) {
+                embed.footer.icon_url = embedFooterIconURL || embedFooterIcon;
+            }
         }
         if (embedFooterTimestamp) {
             embed.timestamp = new Date().toISOString();
         }
 
-        let payload;
+        // Ensure that field values do not exceed Discord's limits.
+        embed.fields = embed.fields.map(field => {
+            if (field.value.length > 1024) {
+                field.value = field.value.slice(0, 1001) + '...';
+            }
+            return field;
+        });
 
+        if (embed.fields.length > 25) {
+            embed.fields = embed.fields.slice(0, 25);
+        }
+
+        let payload;
         if (textContent) {
             payload = { content: textContent, embeds: [embed] };
         } else {
             payload = { embeds: [embed] };
-        }
-
-        core.debug(`Final Payload: ${JSON.stringify(payload, null, 2)}`);
-
-        const embedLength = JSON.stringify(embed).length;
-        core.debug(`Embed character count: ${embedLength}`);
-        core.debug(`Field count: ${embed.fields.length}`);
-        core.debug(`Field name/value lengths:`);
-        for (const field of embed.fields) {
-            core.debug(`- ${field.name}: ${field.value.length} chars`);
         }
 
         const response = await fetch(webhookURL, {
