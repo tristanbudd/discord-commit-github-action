@@ -40034,6 +40034,8 @@ async function run() {
             payload = { embeds: [embed] };
         }
 
+        core.debug(JSON.stringify(payload, null, 2));
+
         const response = await fetch(webhookURL, {
             method: 'POST',
             headers: {
