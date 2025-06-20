@@ -35875,16 +35875,17 @@ async function run() {
         }
 
         if (showChangedFiles && commit) {
+            const modifiedFiles = Array.isArray(commit.modified) ? commit.modified : [];
+            const removedFiles = Array.isArray(commit.removed) ? commit.removed : [];
+
             let formattedMessage;
 
-            if (showColourChanges && commit.modified) {
-                const modifiedFiles = commit.modified.map(file => `+ ${file}`).join('\n');
-                const removedFiles = commit.removed.map(file => `- ${file}`).join('\n');
-                formattedMessage = `\`\`\`diff\n${modifiedFiles}\n${removedFiles}\n\`\`\``;
+            if (showColourChanges && (modifiedFiles.length > 0 || removedFiles.length > 0)) {
+                const modifiedLines = modifiedFiles.map(file => `+ ${file}`).join('\n');
+                const removedLines = removedFiles.map(file => `- ${file}`).join('\n');
+                formattedMessage = `\`\`\`diff\n${modifiedLines}\n${removedLines}\n\`\`\``;
             } else {
-                const modifiedFiles = commit.modified.join('\n');
-                const removedFiles = commit.removed.join('\n');
-                formattedMessage = `\`\`\`\nModified:\n${modifiedFiles}\nRemoved:\n${removedFiles}\n\`\`\``;
+                formattedMessage = `\`\`\`\nModified:\n${modifiedFiles.join('\n')}\nRemoved:\n${removedFiles.join('\n')}\n\`\`\``;
             }
 
             fields.push({
@@ -35903,10 +35904,17 @@ async function run() {
         }
 
         if (showCommitAuthor && commit) {
-            let authorName = commit.author?.name || 'No author information available';
-            let authorUrl = commit.author?.url || commit.author?.profileUrl || null;
+            const authorName = commit.author?.name || 'No author information available';
 
-            let authorValue = authorUrl
+            const username = github.context.payload?.pusher?.name
+                || github.context.payload?.sender?.login
+                || commit.author?.username
+                || commit.author?.login
+                || null;
+
+            const authorUrl = username ? `https://github.com/${username}` : null;
+
+            const authorValue = authorUrl
                 ? `[${authorName}](${authorUrl})`
                 : authorName;
 
