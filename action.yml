@@ -1,5 +1,8 @@
 name: 'Discord Commit Message Webhook'
 description: 'Send a customizable Discord embed via webhook on each commit push, notifying users of the latest changes instantly.'
+branding:
+  icon: 'at-sign'
+  color: 'black'
 author: 'Tristan Budd'
 inputs:
   webhook-url:
