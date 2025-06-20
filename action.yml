@@ -5,6 +5,9 @@ inputs:
   webhook-url:
     description: 'Discord Webhook URL'
     required: true
+  github-token:
+    description: 'GitHub token for accessing commit data (ONLY REQUIRED FOR CHANGED FILES)'
+    required: false
   text-content:
     description: 'Text content to send with the embed'
     required: false
@@ -52,9 +55,9 @@ inputs:
     required: false
     default: 'true'
   show-changed-files:
-    description: 'Show list of changed files'
+    description: 'Show list of changed files (Requires github-token)'
     required: false
-    default: 'true'
+    default: 'false'
   show-commit-branch:
     description: 'Show commit branch in embed'
     required: false
@@ -70,5 +73,3 @@ inputs:
 runs:
   using: 'node20'
   main: 'dist/index.js'
-permissions:
-  contents: read
