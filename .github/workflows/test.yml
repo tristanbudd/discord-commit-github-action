@@ -1,0 +1,26 @@
+name: Send Test Discord Commit Message
+
+on:
+  workflow_dispatch:
+
+jobs:
+  discord_notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: tristanbudd/discord-commit-github-action@master
+        with:
+          webhook-url: ${{ secrets.WEBHOOK_URL }}
+          embed-title: 'New Commit!'
+          embed-description: 'A commit has been pushed to the main branch.'
+          show-commit-message: true
+          color-changes: true
+          show-changed-files: true
+          show-timestamp: true
+          embed-colour: '#00FF00'
+          embed-footer-text: 'GitHub Actions'
+          embed-image-url: ''
+          embed-thumbnail-url: ''
+          embed-author-name: 'GitHub Bot'
+          embed-author-url: 'https://github.com'
