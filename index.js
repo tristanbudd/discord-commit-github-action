@@ -37,7 +37,6 @@ async function run() {
         const embedFooterIconURL = core.getInput('embed-footer-icon-url', { required: false }) || '';
         const embedFooterTimestamp = core.getInput('embed-footer-timestamp', { required: false }) === 'true';
         const showCommitMessage = core.getInput('show-commit-message', { required: false }) === 'true';
-        const showColourChanges = core.getInput('show-colour-changes', { required: false }) === 'true';
         const showChangedFiles = core.getInput('show-changed-files', { required: false }) === 'true';
         const showCommitBranch = core.getInput('show-commit-branch', { required: false }) === 'true';
         const showCommitAuthor = core.getInput('show-commit-author', { required: false }) === 'true';
@@ -53,12 +52,7 @@ async function run() {
 
         if (showCommitMessage && commit) {
             let formattedMessage;
-
-            if (showColourChanges && commit.message) {
-                formattedMessage = `\`\`\`diff\n${commit.message || 'No commit message provided'}\n\`\`\``;
-            } else {
-                formattedMessage = `\`\`\`\n${commit.message || 'No commit message provided'}\n\`\`\``;
-            }
+            formattedMessage = `\`\`\`\n${commit.message || 'No commit message provided'}\n\`\`\``;
 
             fields.push({
                 name: 'Commit Message',
@@ -87,48 +81,27 @@ async function run() {
             });
 
             let formattedMessage;
-            if (showColourChanges && (addedFiles.length || modifiedFiles.length || removedFiles.length)) {
-                const addedLines = addedFiles.map(f => `+${f}`).join('\n');
-                const modifiedLines = modifiedFiles.map(f => ` ${f}`).join('\n');
-                const removedLines = removedFiles.map(f => `-${f}`).join('\n');
+            formattedMessage = '```\n';
 
-                formattedMessage = '```diff\n';
-
-                if (addedLines.length) {
-                    formattedMessage += addedLines + '\n\n';
-                }
-                if (modifiedLines.length) {
-                    formattedMessage += modifiedLines + '\n\n';
-                }
-                if (removedLines.length) {
-                    formattedMessage += removedLines + '\n';
-                }
-
-                formattedMessage += '```';
-
+            if (addedFiles.length) {
+                formattedMessage += 'Added:\n' + addedFiles.join('\n') + '\n\n';
             } else {
-                formattedMessage = '```\n';
-
-                if (addedFiles.length) {
-                    formattedMessage += 'Added:\n' + addedFiles.join('\n') + '\n\n';
-                } else {
-                    formattedMessage += 'Added:\n\n';
-                }
-
-                if (modifiedFiles.length) {
-                    formattedMessage += 'Modified:\n' + modifiedFiles.join('\n') + '\n\n';
-                } else {
-                    formattedMessage += 'Modified:\n\n';
-                }
-
-                if (removedFiles.length) {
-                    formattedMessage += 'Removed:\n' + removedFiles.join('\n') + '\n';
-                } else {
-                    formattedMessage += 'Removed:\n';
-                }
-
-                formattedMessage += '```';
+                formattedMessage += 'Added:\n\n';
             }
+
+            if (modifiedFiles.length) {
+                formattedMessage += 'Modified:\n' + modifiedFiles.join('\n') + '\n\n';
+            } else {
+                formattedMessage += 'Modified:\n\n';
+            }
+
+            if (removedFiles.length) {
+                formattedMessage += 'Removed:\n' + removedFiles.join('\n') + '\n';
+            } else {
+                formattedMessage += 'Removed:\n';
+            }
+
+            formattedMessage += '```';
 
             fields.push({
                 name: 'Changed Files',
