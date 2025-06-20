@@ -91,9 +91,23 @@ async function run() {
                 const addedLines = addedFiles.map(f => `+${f}`).join('\n');
                 const modifiedLines = modifiedFiles.map(f => ` ${f}`).join('\n');
                 const removedLines = removedFiles.map(f => `-${f}`).join('\n');
-                formattedMessage = `\`\`\`diff\n${addedLines}\n${modifiedLines}\n${removedLines}\n\`\`\``;
+                formattedMessage = `\`\`\`diff
+${addedLines}\n
+${modifiedLines}\n
+${removedLines}
+\`\`\``;
             } else {
-                formattedMessage = `\`\`\`\nAdded:\n${addedFiles.join('\n')}\nModified:\n${modifiedFiles.join('\n')}\nRemoved:\n${removedFiles.join('\n')}\n\`\`\``;
+                formattedMessage = `\`\`\`
+Added:
+${addedFiles.join('\n')}
+
+Modified:
+${modifiedFiles.join('\n')}
+
+Removed:
+${removedFiles.join('\n')}
+
+\`\`\``;
             }
 
             fields.push({
