@@ -18,6 +18,35 @@ function hexToDecimal(hex) {
 }
 
 /**
+ * Truncates a string to a specified maximum length.
+ * If the string exceeds the maximum length,
+ * it will be truncated and appended with '...'.
+ * @param str
+ * @param max
+ * @returns {string|*}
+ */
+function truncate(str, max) {
+    return str.length > max ? str.slice(0, max - 3) + '...' : str;
+}
+
+/**
+ * Calculates the size of an embed object based on its content.
+ * @param embed
+ * @returns {number}
+ */
+function calculateEmbedSize(embed) {
+    let size = 0;
+    size += embed.title?.length || 0;
+    size += embed.description?.length || 0;
+    size += embed.footer?.text?.length || 0;
+    size += embed.author?.name?.length || 0;
+    for (const field of embed.fields || []) {
+        size += (field.name?.length || 0) + (field.value?.length || 0);
+    }
+    return size;
+}
+
+/**
  * Main function to handle the GitHub commit webhook.
  * Collects relevant commit data and sends it to a specified webhook.
  *
@@ -33,7 +62,7 @@ async function run() {
 
         // Parse the inputs for text content, title, description, etc.
         // If not provided, default values will be used for optional inputs.
-        const textContent = core.getInput('text-content', { required: false }) || '';
+        let textContent = core.getInput('text-content', { required: false }) || '';
         const embedTitle = core.getInput('embed-title', { required: false }) || 'GitHub Commit Notification';
         const embedDescription = core.getInput('embed-description', { required: false }) || '';
         const embedColour = core.getInput('embed-colour', { required: false }) || '#ffffff';
@@ -201,16 +230,34 @@ async function run() {
             embed.timestamp = new Date().toISOString();
         }
 
-        // Ensure that field values do not exceed Discord's limits.
-        embed.fields = embed.fields.map(field => {
-            if (field.value.length > 1024) {
-                field.value = field.value.slice(0, 1001) + '...';
-            }
-            return field;
+        // Ensure that values do not exceed Discord's limits.
+        embed.title = truncate(embed.title || '', 256);
+        embed.description = truncate(embed.description || '', 4096);
+
+        if (embed.author) {
+            embed.author.name = truncate(embed.author.name || '', 256);
+        }
+
+        if (embed.footer) {
+            embed.footer.text = truncate(embed.footer.text || '', 2048);
+        }
+
+        if (textContent && textContent.length > 2000) {
+            textContent = textContent.slice(0, 1997) + '...';
+        }
+
+        embed.fields = (embed.fields || []).slice(0, 25).map(field => {
+            return {
+                name: truncate(field.name || '', 256),
+                value: truncate(field.value || '', 1024),
+                inline: !!field.inline
+            };
         });
 
-        if (embed.fields.length > 25) {
-            embed.fields = embed.fields.slice(0, 25);
+        let totalSize = calculateEmbedSize(embed);
+        while (totalSize > 6000 && embed.fields.length > 0) {
+            embed.fields.pop(); // remove last field
+            totalSize = calculateEmbedSize(embed);
         }
 
         let payload;
