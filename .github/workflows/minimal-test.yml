@@ -1,6 +1,5 @@
 name: Send Test Discord Commit Message - Minimal
 
-
 on: [push]
 
 jobs:
