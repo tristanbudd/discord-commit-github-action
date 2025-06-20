@@ -35877,26 +35877,25 @@ async function run() {
         }
 
         if (showChangedFiles && commitSha) {
-            let parentSha = runGitCommand(`git rev-parse ${commitSha}^`).trim();
-            if (!parentSha) {
-                parentSha = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'; // Empty tree SHA for initial commit
-            }
+            const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
 
-            const diffNameStatus = runGitCommand(`git diff --name-status ${parentSha} ${commitSha}`);
+            const { data: commitData } = await octokit.rest.repos.getCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: commitSha,
+            });
 
             const addedFiles = [];
             const modifiedFiles = [];
             const removedFiles = [];
 
-            diffNameStatus.split('\n').forEach(line => {
-                const [status, file] = line.split('\t');
-                if (status === 'A') addedFiles.push(file);
-                else if (status === 'M') modifiedFiles.push(file);
-                else if (status === 'D') removedFiles.push(file);
+            commitData.files.forEach(file => {
+                if (file.status === 'added') addedFiles.push(file.filename);
+                else if (file.status === 'modified') modifiedFiles.push(file.filename);
+                else if (file.status === 'removed') removedFiles.push(file.filename);
             });
 
             let formattedMessage;
-
             if (showColourChanges && (addedFiles.length || modifiedFiles.length || removedFiles.length)) {
                 const addedLines = addedFiles.map(f => `+${f}`).join('\n');
                 const modifiedLines = modifiedFiles.map(f => ` ${f}`).join('\n');
