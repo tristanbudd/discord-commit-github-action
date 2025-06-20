@@ -1,4 +1,4 @@
-name: Send Test Discord Commit Message - Minimal
+name: Send Test Discord Commit Message - Minimal Dev
 
 on: [push]
 
