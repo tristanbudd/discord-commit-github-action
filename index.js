@@ -91,23 +91,43 @@ async function run() {
                 const addedLines = addedFiles.map(f => `+${f}`).join('\n');
                 const modifiedLines = modifiedFiles.map(f => ` ${f}`).join('\n');
                 const removedLines = removedFiles.map(f => `-${f}`).join('\n');
-                formattedMessage = `\`\`\`diff
-${addedLines}\n
-${modifiedLines}\n
-${removedLines}
-\`\`\``;
+
+                formattedMessage = '```diff\n';
+
+                if (addedLines.length) {
+                    formattedMessage += addedLines + '\n\n';
+                }
+                if (modifiedLines.length) {
+                    formattedMessage += modifiedLines + '\n\n';
+                }
+                if (removedLines.length) {
+                    formattedMessage += removedLines + '\n';
+                }
+
+                formattedMessage += '```';
+
             } else {
-                formattedMessage = `\`\`\`
-Added:
-${addedFiles.join('\n')}
+                formattedMessage = '```\n';
 
-Modified:
-${modifiedFiles.join('\n')}
+                if (addedFiles.length) {
+                    formattedMessage += 'Added:\n' + addedFiles.join('\n') + '\n\n';
+                } else {
+                    formattedMessage += 'Added:\n\n';
+                }
 
-Removed:
-${removedFiles.join('\n')}
+                if (modifiedFiles.length) {
+                    formattedMessage += 'Modified:\n' + modifiedFiles.join('\n') + '\n\n';
+                } else {
+                    formattedMessage += 'Modified:\n\n';
+                }
 
-\`\`\``;
+                if (removedFiles.length) {
+                    formattedMessage += 'Removed:\n' + removedFiles.join('\n') + '\n';
+                } else {
+                    formattedMessage += 'Removed:\n';
+                }
+
+                formattedMessage += '```';
             }
 
             fields.push({
