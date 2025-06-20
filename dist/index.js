@@ -39475,6 +39475,7 @@ async function run() {
         const embedAuthorName = core.getInput('embed-author-name') || '';
         const embedAuthorUrl = core.getInput('embed-author-url') || '';
 
+        const context = github.context;
         const commit = github.context.payload.head_commit;
         const repoURL = `https://github.com/${context.repo.owner}/${context.repo.repo}`;
         const commitURL = commit ? commit.url.replace('api.', '').replace('/repos', '') : null;
@@ -39552,9 +39553,7 @@ async function run() {
     }
 }
 
-run().then(r => {
-    core.info('Action completed successfully');
-});
+run()
 module.exports = __webpack_exports__;
 /******/ })()
 ;
