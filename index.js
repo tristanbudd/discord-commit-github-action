@@ -1,21 +1,13 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 const fetch = require('node-fetch');
+const { Octokit } = require('@octokit/rest');
 
 function hexToDecimal(hex) {
     if (!hex) return 0xffffff; // Default to white if no hex is provided
     if (hex.startsWith('#')) hex = hex.slice(1);
 
     return parseInt(hex, 16);
-}
-
-function runGitCommand(cmd) {
-    try {
-        return execSync(cmd, { encoding: 'utf8' }).trim();
-    } catch (err) {
-        core.warning(`Git command failed: ${cmd}`);
-        return '';
-    }
 }
 
 async function run() {
@@ -62,7 +54,7 @@ async function run() {
         }
 
         if (showChangedFiles && commitSha) {
-            const octokit = github.getOctokit(githubToken);
+            const octokit = new Octokit({ auth: githubToken });
 
             const { data: commitData } = await octokit.rest.repos.getCommit({
                 owner: context.repo.owner,
@@ -130,10 +122,6 @@ async function run() {
                 || commit.author?.username
                 || commit.author?.login
                 || null;
-
-            const displayName = username
-                ? `${authorName} (${username})`
-                : authorName;
 
             const authorValue = username
                 ? `${authorName} ([${username}](https://github.com/${username}))`
@@ -205,13 +193,15 @@ async function run() {
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to send webhook: ${response.statusText}`);
+            core.setFailed(`Failed to send webhook: ${response.statusText}`);
+            return;
         }
-
         core.info('Webhook sent successfully');
     } catch (error) {
         core.setFailed(error.message);
     }
 }
 
-run()
+run().catch(error => {
+    core.setFailed(`Action failed with error: ${error.message}`);
+});
