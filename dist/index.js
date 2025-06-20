@@ -35819,6 +35819,15 @@ function hexToDecimal(hex) {
     return parseInt(hex, 16);
 }
 
+function runGitCommand(cmd) {
+    try {
+        return execSync(cmd, { encoding: 'utf8' }).trim();
+    } catch (err) {
+        core.warning(`Git command failed: ${cmd}`);
+        return '';
+    }
+}
+
 async function run() {
     try {
         const webhookURL = core.getInput('webhook-url', { required: true });
@@ -35846,7 +35855,8 @@ async function run() {
         const context = github.context;
         const commit = github.context.payload.head_commit;
         const repoURL = `https://github.com/${context.repo.owner}/${context.repo.repo}`;
-        const commitURL = commit ? commit.url.replace('api.', '').replace('/repos', '') : null;
+        const commitSha = commit ? commit.id || commit.sha : null;
+        const commitURL = commitSha ? `https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${commitSha}` : null;
 
         let fields = [];
 
@@ -35866,20 +35876,31 @@ async function run() {
             });
         }
 
-        const commits = context.payload.commits || [];
-        const lastCommit = commits.length > 0 ? commits[commits.length - 1] : null;
+        if (showChangedFiles && commitSha) {
+            let parentSha = runGitCommand(`git rev-parse ${commitSha}^`).trim();
+            if (!parentSha) {
+                parentSha = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'; // Empty tree SHA for initial commit
+            }
 
-        if (showChangedFiles && lastCommit) {
-            const addedFiles = lastCommit.added || [];
-            const modifiedFiles = lastCommit.modified || [];
-            const removedFiles = lastCommit.removed || [];
+            const diffNameStatus = runGitCommand(`git diff --name-status ${parentSha} ${commitSha}`);
+
+            const addedFiles = [];
+            const modifiedFiles = [];
+            const removedFiles = [];
+
+            diffNameStatus.split('\n').forEach(line => {
+                const [status, file] = line.split('\t');
+                if (status === 'A') addedFiles.push(file);
+                else if (status === 'M') modifiedFiles.push(file);
+                else if (status === 'D') removedFiles.push(file);
+            });
 
             let formattedMessage;
 
-            if (showColourChanges && (addedFiles.length > 0 || modifiedFiles.length > 0 || removedFiles.length > 0)) {
-                const addedLines = addedFiles.map(file => `+${file}`).join('\n');
-                const modifiedLines = modifiedFiles.map(file => ` ${file}`).join('\n');
-                const removedLines = removedFiles.map(file => `-${file}`).join('\n');
+            if (showColourChanges && (addedFiles.length || modifiedFiles.length || removedFiles.length)) {
+                const addedLines = addedFiles.map(f => `+${f}`).join('\n');
+                const modifiedLines = modifiedFiles.map(f => ` ${f}`).join('\n');
+                const removedLines = removedFiles.map(f => `-${f}`).join('\n');
                 formattedMessage = `\`\`\`diff\n${addedLines}\n${modifiedLines}\n${removedLines}\n\`\`\``;
             } else {
                 formattedMessage = `\`\`\`\nAdded:\n${addedFiles.join('\n')}\nModified:\n${modifiedFiles.join('\n')}\nRemoved:\n${removedFiles.join('\n')}\n\`\`\``;
