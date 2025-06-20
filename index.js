@@ -45,8 +45,15 @@ async function run() {
 
             if (showColourChanges && commit.message) {
                 const lines = commit.message.split('\n');
-                const processedLines = lines.map(line => line);
+                const processedLines = lines.map(line => {
+                    if (line.startsWith('+') || line.startsWith('-')) {
+                        return line;
+                    } else {
+                        return ' ' + line;
+                    }
+                });
                 formattedMessage = `\`\`\`diff\n${processedLines.join('\n')}\n\`\`\``;
+
             } else {
                 formattedMessage = `\`\`\`\n${commit.message || 'No commit message provided'}\n\`\`\``;
             }
@@ -59,17 +66,19 @@ async function run() {
         }
 
         if (showChangedFiles && commit) {
+            const addedFiles = Array.isArray(commit.added) ? commit.added : [];
             const modifiedFiles = Array.isArray(commit.modified) ? commit.modified : [];
             const removedFiles = Array.isArray(commit.removed) ? commit.removed : [];
 
             let formattedMessage;
 
-            if (showColourChanges && (modifiedFiles.length > 0 || removedFiles.length > 0)) {
-                const modifiedLines = modifiedFiles.map(file => `+${file}`).join('\n');
+            if (showColourChanges && (addedFiles.length > 0 || modifiedFiles.length > 0 || removedFiles.length > 0)) {
+                const addedLines = addedFiles.map(file => `+${file}`).join('\n');
+                const modifiedLines = modifiedFiles.map(file => ` ${file}`).join('\n');
                 const removedLines = removedFiles.map(file => `-${file}`).join('\n');
-                formattedMessage = `\`\`\`diff\n${modifiedLines}\n${removedLines}\n\`\`\``;
+                formattedMessage = `\`\`\`diff\n${addedLines}\n${modifiedLines}\n${removedLines}\n\`\`\``;
             } else {
-                formattedMessage = `\`\`\`\nModified:\n${modifiedFiles.join('\n')}\nRemoved:\n${removedFiles.join('\n')}\n\`\`\``;
+                formattedMessage = `\`\`\`\nAdded:\n${addedFiles.join('\n')}\nModified:\n${modifiedFiles.join('\n')}\nRemoved:\n${removedFiles.join('\n')}\n\`\`\``;
             }
 
             fields.push({
@@ -79,13 +88,16 @@ async function run() {
             });
         }
 
-
         if (showCommitBranch && commit) {
-            fields.push({
-                name: 'Branch',
-                value: commit.branch || 'No branch information available',
-                inline: true
-            });
+            const branch = github.context.ref?.replace('refs/heads/', '') || 'No branch information available';
+
+            if (showCommitBranch) {
+                fields.push({
+                    name: 'Branch',
+                    value: branch,
+                    inline: true
+                });
+            }
         }
 
         if (showCommitAuthor && commit) {
