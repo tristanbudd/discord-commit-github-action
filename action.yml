@@ -53,10 +53,6 @@ inputs:
     description: 'Show commit message in embed'
     required: false
     default: 'true'
-  colour-changes:
-    description: 'Colour embed based on plus/minus changes'
-    required: false
-    default: 'true'
   show-changed-files:
     description: 'Show list of changed files (Requires github-token)'
     required: false
