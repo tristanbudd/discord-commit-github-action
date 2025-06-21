@@ -54,7 +54,6 @@ A fully customized embed using all available fields such as color, images, autho
 | `embed-footer-icon-url` | ❌ No    | URL of the icon shown in the footer                                                             |
 | `embed-footer-timestamp`| ❌ No    | Whether to include a timestamp in the embed footer (`true`/`false`)                             |
 | `show-commit-message`   | ❌ No    | Whether to show the commit message in the embed (`true`/`false`)                                |
-| `colour-changes`        | ❌ No    | Colour the embed based on commit additions/deletions (`true`/`false`)                           |
 | `show-changed-files`    | ❌ No    | Show a list of changed files (requires `github-token`) (`true`/`false`)                         |
 | `show-commit-branch`    | ❌ No    | Display the branch name of the commit (`true`/`false`)                                          |
 | `show-commit-author`    | ❌ No    | Show the commit author's name and avatar (`true`/`false`)                                       |
