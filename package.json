@@ -6,7 +6,9 @@
   "scripts": {
     "build": "ncc build index.js -o dist"
   },
-  "private": true,
+  "author": "Tristan Budd",
+  "license": "SEE LICENSE IN ROOT DIRECTORY",
+  "type": "commonjs",
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.1",
