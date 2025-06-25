@@ -1,5 +1,5 @@
 {
-  "name": "Discord Commit Github Action",
+  "name": "discord-commit-github-action",
   "description": "Sends a customizable Discord embed via webhook whenever a commit is pushed to the repository, notifying users of the latest changes.",
   "version": "1.0.1",
   "main": "index.js",
